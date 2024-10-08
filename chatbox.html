@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Chatbox Guide</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-image: url('assets/img/handTyping.jpg'); /* Replace with your background image URL */
+      background-size: cover; /* Cover the entire screen */
+      background-position: center; /* Center the background image */
+      height: 100vh; /* Full viewport height */
+      display: flex; /* Use flexbox for centering */
+      align-items: center; /* Vertically center */
+      justify-content: center; /* Horizontally center */
+      margin: 0; /* Remove default margin */
+    }
+
+    .chatbox {
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background for contrast */
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .chat-bubble {
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: inline-block;
+      animation: slideIn 0.5s ease-in-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .chat-bubble.user {
+      background-color: #007bff;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .chat-bubble.bot {
+      background-color: #f1f1f1;
+      color: black;
+    }
+
+    .input-area {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chatbox">
+  <div id="chatContainer" class="d-flex flex-column justify-center ali"></div>
+
+  <div class="input-area mt-2" id="inputArea">
+    <input type="text" id="chatInput" class="form-control" placeholder="Type your answer..." onkeypress="handleKeyPress(event)">
+    <button id="sendButton" class="btn btn-primary mt-2" onclick="sendMessage()">Send</button>
+    <button id="nextButton" class="btn btn-secondary mt-2" onclick="showNextStep()" style="display: none;">Next</button>
+  </div>
+</div>
+<!--  -->
+<!-- Bootstrap JS and Dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+<!-- Custom JS -->
+<script>
+    const chatContainer = document.getElementById('chatContainer');
+    const chatInput = document.getElementById('chatInput');
+    const nextButton = document.getElementById('nextButton');
+    const inputArea = document.getElementById('inputArea');
+    const sendButton = document.getElementById('sendButton');
+  
+    let userName = '';
+    let stepIndex = 0;
+  
+    // Guide messages
+    const guideMessages = [
+      "To register, follow these steps:(click Next)",
+      "1. Fill in your personal details including your name, email, and contact information.(click Next)",
+      "2. Choose a secure password that you can remember. (click Next)",
+      "3. Agree to the terms and conditions.(click Next)",
+      "4. Click 'Submit' to complete your registration. (click Next)",
+      "Would you like to go over the guide again? (Type 'yes' or 'no' and click Enter)"
+    ];
+  
+    // Start the chat
+    function startChat() {
+      addBotMessage('My name is Israel, what is your name?');
+    }
+  
+    // Add bot message with typing animation
+    function addBotMessage(message) {
+      const botBubble = document.createElement('div');
+      botBubble.className = 'chat-bubble bot';
+      chatContainer.appendChild(botBubble);
+      chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
+  
+      typeMessage(message, botBubble);
+    }
+  
+    // Function to type the message letter by letter
+    function typeMessage(message, bubble) {
+      let index = 0;
+      const typingSpeed = 100; // Adjust typing speed here (in milliseconds)
+  
+      function typeNextLetter() {
+        if (index < message.length) {
+          bubble.textContent += message.charAt(index);
+          index++;
+          setTimeout(typeNextLetter, typingSpeed);
+        } else {
+          chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom after typing
+        }
+      }
+  
+      typeNextLetter();
+    }
+  
+    // Add user message
+    function addUserMessage(message) {
+      const userBubble = document.createElement('div');
+      userBubble.className = 'chat-bubble user';
+      userBubble.textContent = message;
+      chatContainer.appendChild(userBubble);
+      chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
+    }
+  
+    // Handle user input
+    function sendMessage() {
+      const userMessage = chatInput.value.trim();
+      if (userMessage) {
+        addUserMessage(userMessage);
+  
+        // Save the user's name
+        if (!userName) {
+          userName = userMessage; // Save name
+          chatInput.value = ''; // Clear input
+          sendButton.style.display = 'none'; // Hide send button
+          addBotMessage('Welcome, ' + userName + '! Now let’s go through the registration process step by step. Click Next to proceed.');
+          nextButton.style.display = 'inline-block'; // Show the next button
+        } else if (stepIndex < guideMessages.length - 1) {
+          chatInput.value = ''; // Clear input for the next response
+          showNextStep();
+        } else {
+          handleGuideAgain(userMessage);
+        }
+      }
+    }
+  
+    // Show the next guide message
+    function showNextStep() {
+      if (stepIndex < guideMessages.length - 1) {
+        addBotMessage(guideMessages[stepIndex]);
+        stepIndex++;
+      } else {
+        // If at the end of the guide, ask if they want to go over it again
+        addBotMessage(guideMessages[stepIndex]);
+        stepIndex++; // Move to the next step
+        nextButton.style.display = 'none'; // Hide next button
+        inputArea.style.display = 'block'; // Show input area for the yes/no question
+        chatInput.value = ''; // Clear input field
+      }
+    }
+  
+    // Handle the response for the guide repetition
+    function handleGuideAgain(userMessage) {
+      const response = userMessage.toLowerCase();
+      chatInput.value = ''; // Clear the input field immediately after receiving the response
+  
+      if (response === 'yes' || response === 'no') {
+        // Refresh the page immediately for both 'yes' and 'no'
+        window.location.reload();
+      } else {
+        addBotMessage("Please type 'yes' or 'no'.");
+      }
+    }
+  
+    // Handle 'Enter' key press to send message
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  
+    // Start the chat when the page loads
+    window.onload = startChat;
+  </script>
+  
+
+</body>
+</html>
